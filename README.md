@@ -4,6 +4,8 @@
 
 Built for the Meta Global AI Developer Hackathon (Indie track, theme *Build for Your World*).
 
+**▶ Live demo: https://leaf-doctor-eight.vercel.app** (toggle VI / EN in the top-right corner)
+
 ## The problem
 
 Vietnam has ~9 million farming households, most on plots under one hectare. When rice blast, coffee rust or durian leaf blight shows up, the usual options are guessing, asking the pesticide seller (who has something to sell), or waiting days for an extension officer. Wrong or late treatment means lost harvests and over-spraying.
