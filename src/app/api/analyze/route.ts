@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 import { diagnose, severityFor } from "@/lib/diagnose";
 import { hasApiKey } from "@/lib/meta";
 import { demoResult } from "@/lib/demo";
@@ -6,7 +7,7 @@ import { countBoth, countOn, makeGrid, segment, toMaskGrid, union, type Grid, ty
 import type { AnalyzeResult, Lang, LesionBox, Measurement } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 interface AnalyzeBody {
   image: string;
@@ -18,6 +19,8 @@ interface AnalyzeBody {
 }
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req, "analyze", 30);
+  if (limited) return limited;
   const body = (await req.json()) as AnalyzeBody;
   const lang: Lang = body.lang === "en" ? "en" : "vi";
   if (!body.image?.startsWith("data:image/") || !body.width || !body.height) {

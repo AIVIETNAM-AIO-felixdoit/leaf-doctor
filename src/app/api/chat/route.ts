@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 import { MODELS, hasApiKey, metaClient } from "@/lib/meta";
 import type { Diagnosis, Lang, Measurement } from "@/lib/types";
 
@@ -14,6 +15,8 @@ interface ChatBody {
 
 /** Follow-up questions about an existing diagnosis, streamed back as plain text. */
 export async function POST(req: Request) {
+  const limited = rateLimit(req, "chat", 60);
+  if (limited) return limited;
   const body = (await req.json()) as ChatBody;
   const vi = body.lang !== "en";
 

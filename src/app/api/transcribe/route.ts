@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 import { META_BASE_URL, MODELS, hasApiKey } from "@/lib/meta";
 
 export const runtime = "nodejs";
 
 /** Expects multipart form with `audio` (16 kHz mono 16-bit WAV, encoded in the browser) and `lang`. */
 export async function POST(req: Request) {
+  const limited = rateLimit(req, "transcribe", 60);
+  if (limited) return limited;
   const form = await req.formData();
   const audio = form.get("audio");
   const lang = form.get("lang") === "en" ? "English" : "Vietnamese";
