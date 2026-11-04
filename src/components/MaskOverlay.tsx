@@ -38,9 +38,6 @@ export function MaskOverlay({ src, measurement, show }: { src: string; measureme
     ctx.putImageData(img, 0, 0);
   }, [measurement]);
 
-  const w = measurement?.imageWidth ?? 1;
-  const h = measurement?.imageHeight ?? 1;
-
   return (
     <div className="relative overflow-hidden rounded-2xl bg-black/5">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -50,23 +47,6 @@ export function MaskOverlay({ src, measurement, show }: { src: string; measureme
         className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-500 ${show ? "opacity-100" : "opacity-0"}`}
         style={{ imageRendering: "auto" }}
       />
-      {measurement && show && (
-        <svg viewBox={`0 0 ${w} ${h}`} className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none">
-          {measurement.boxes.map((b, i) => (
-            <rect
-              key={i}
-              x={b.left}
-              y={b.top}
-              width={b.right - b.left}
-              height={b.bottom - b.top}
-              fill="none"
-              stroke="#fde047"
-              strokeWidth={Math.max(w, h) / 300}
-              rx={Math.max(w, h) / 200}
-            />
-          ))}
-        </svg>
-      )}
     </div>
   );
 }
