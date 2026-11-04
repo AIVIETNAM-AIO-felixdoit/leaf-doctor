@@ -3,7 +3,7 @@ import { MODELS, metaClient } from "./meta";
 import type { LesionBox, MaskGrid } from "./types";
 
 /** Grid resolution used for area maths and the overlay (long side, in cells). */
-const GRID_LONG_SIDE = 320;
+const GRID_LONG_SIDE = 512;
 
 export interface Grid {
   width: number;
@@ -19,7 +19,10 @@ export function makeGrid(imageWidth: number, imageHeight: number): Grid {
 }
 
 export interface SegmentResult {
+  /** Union of every instance. */
   grid: Grid;
+  /** One grid per detected instance, so callers can pick e.g. only the leaves that carry lesions. */
+  instances: Grid[];
   boxes: LesionBox[];
   count: number;
 }
@@ -39,6 +42,7 @@ export async function segment(
   const result = await parsed.finalResult;
 
   const grid = makeGrid(imageWidth, imageHeight);
+  const instances: Grid[] = [];
   const boxes: LesionBox[] = [];
   const cellW = imageWidth / grid.width;
   const cellH = imageHeight / grid.height;
@@ -49,6 +53,8 @@ export async function segment(
     if (mw <= 0 || mh <= 0 || right <= left || bottom <= top) continue;
     const raster = decodeMaskToRaster(record.mask);
     boxes.push({ left, top, right, bottom, confidence: record.confidence, prompt });
+    const instance = makeGrid(imageWidth, imageHeight);
+    instances.push(instance);
 
     const gx0 = Math.max(0, Math.floor(left / cellW));
     const gx1 = Math.min(grid.width, Math.ceil(right / cellW));
@@ -62,12 +68,15 @@ export async function segment(
         const sx = (gx + 0.5) * cellW;
         if (sx < left || sx >= right) continue;
         const mx = Math.min(mw - 1, Math.floor(((sx - left) / (right - left)) * mw));
-        if (raster[my * mw + mx]) grid.cells[gy * grid.width + gx] = 1;
+        if (raster[my * mw + mx]) {
+          grid.cells[gy * grid.width + gx] = 1;
+          instance.cells[gy * grid.width + gx] = 1;
+        }
       }
     }
   }
 
-  return { grid, boxes, count: boxes.length };
+  return { grid, instances, boxes, count: boxes.length };
 }
 
 async function openSamStream(imageDataUrl: string, prompt: string) {

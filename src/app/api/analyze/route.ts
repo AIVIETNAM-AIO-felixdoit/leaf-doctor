@@ -51,6 +51,10 @@ export async function POST(req: Request) {
     const lesionPromises = diagnosis.lesionPrompts.map((p, i) => timed(`sam_lesion_${i}`, safeSegment(body, p)));
 
     const [leaf, plant, ...lesions] = await Promise.all([leafPromise, extraPlant, ...lesionPromises]);
+    // SAM is sensitive to wording; if the model's phrases found nothing on a sick plant, "spot" is the most robust fallback.
+    if (diagnosis.lesionPrompts.length && !lesions.some((s) => ok(s) && s.count > 0)) {
+      lesions.push(await timed("sam_lesion_fallback", safeSegment(body, "spot")));
+    }
     const measurement = measure(body.width, body.height, [leaf, plant], lesions, diagnosis.disease);
     timings.total = Date.now() - t0;
 
@@ -77,9 +81,15 @@ const ok = (s: Seg): s is SegmentResult => !!s && "grid" in s;
 
 function measure(width: number, height: number, plantSegs: Seg[], lesionSegs: Seg[], disease: string): Measurement {
   const empty = makeGrid(width, height);
-  const merge = (segs: Seg[]): Grid => segs.filter(ok).reduce((g, s) => union(g, s.grid), empty);
-  const leaf = merge(plantSegs);
-  const lesion = merge(lesionSegs);
+  const merge = (grids: Grid[]): Grid => grids.reduce((g, s) => union(g, s), empty);
+  const lesion = merge(lesionSegs.filter(ok).map((s) => s.grid));
+
+  // "leaf" also finds background leaves; only the ones carrying lesions are the patient.
+  // With no lesions (healthy plant), fall back to the largest leaf.
+  const leafInstances = plantSegs.filter(ok).flatMap((s) => s.instances);
+  const sick = leafInstances.filter((g) => countBoth(g.cells, lesion.cells) > 0);
+  const largest = leafInstances.reduce<Grid | null>((best, g) => (!best || countOn(g.cells) > countOn(best.cells) ? g : best), null);
+  const leaf = merge(sick.length ? sick : largest ? [largest] : []);
   const boxes: LesionBox[] = lesionSegs.filter(ok).flatMap((s) => s.boxes);
 
   // Lesions sometimes fall outside the leaf mask at the edges, so the plant area is leaf ∪ lesion.

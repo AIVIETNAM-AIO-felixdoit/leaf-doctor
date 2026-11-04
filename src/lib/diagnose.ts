@@ -23,8 +23,10 @@ Reply with ONE JSON object and nothing else, using exactly these keys:
   "prevention": string[],
   "urgency": string,               // what happens if untreated and how fast to act
   "plantPrompt": string,           // ENGLISH short noun phrase for a segmentation model to find the plant tissue, e.g. "leaf", "rice leaf", "coffee leaf", "fruit"
-  "lesionPrompts": string[]        // 1-2 ENGLISH short noun phrases for a segmentation model to find the damaged areas, e.g. "brown spot", "yellow patch", "white powder"; [] if healthy
+  "lesionPrompts": string[]        // 1-2 ENGLISH phrases for a segmentation model to find the damaged areas; [] if healthy
 }
+
+lesionPrompts rules (the segmentation model only understands simple visual phrases): use the form "<colour> spot" or "<colour> patch" naming the colour you actually see, e.g. "brown spot", "orange spot", "yellow patch", "black spot", "white patch", "grey spot". Never use abstract words such as lesion, pustule, rust, powder, blight, necrosis or infection.
 
 Write every human-readable string value in ${LANG_NAME[lang]}. plantPrompt and lesionPrompts must stay in English, be 1-3 words each, and must not contain commas.`;
 }
