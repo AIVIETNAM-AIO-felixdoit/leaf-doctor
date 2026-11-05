@@ -9,7 +9,7 @@ const font = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Leaf Doctor · Bác Sĩ Lá",
+  title: "Leaf Doctor",
   description: "Snap a leaf: Muse Spark diagnoses the disease, SAM 3.1 measures how much of the leaf is damaged.",
 };
 

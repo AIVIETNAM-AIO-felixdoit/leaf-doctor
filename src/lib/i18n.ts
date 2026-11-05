@@ -1,7 +1,7 @@
 import type { Lang, Severity } from "./types";
 
 const strings = {
-  appName: { vi: "Bác Sĩ Lá", en: "Leaf Doctor" },
+  appName: { vi: "Leaf Doctor", en: "Leaf Doctor" },
   tagline: {
     vi: "Chụp một chiếc lá — biết bệnh gì, nặng bao nhiêu phần trăm, xử lý thế nào.",
     en: "Snap one leaf — know the disease, how much of the leaf is damaged, and what to do.",

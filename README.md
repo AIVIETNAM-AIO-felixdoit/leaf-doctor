@@ -1,4 +1,4 @@
-# 🌿 Leaf Doctor · Bác Sĩ Lá
+# 🌿 Leaf Doctor
 
 **Snap one leaf. Know the disease, how much of the leaf is damaged, and what to do — in the farmer's own language.**
 
